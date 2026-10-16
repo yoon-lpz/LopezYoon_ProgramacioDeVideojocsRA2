@@ -20,17 +20,19 @@ public class CanonRotation : MonoBehaviour, InputSystem_Actions.ICannonActions
     private bool isRaising = false;
     [SerializeField] private float _multiplier = 10f;
 
-	[SerializeField] private Camera MainCamera;
+	private Camera MainCamera;
     public InputSystem_Actions InputAction;
 	private void Awake()
     {
-        InputAction = GetComponent<InputSystem_Actions>();
+		MainCamera = Camera.main;
+
+		InputAction = new InputSystem_Actions();
         InputAction.Cannon.SetCallbacks(this);
         _initialScaleX = PotencyBar.transform.localScale.x;
     }
 
     public void OnEnable() => InputAction.Enable();
-    public void OnDisable() => InputAction.Enable();
+    public void OnDisable() => InputAction.Disable();
 
 	void Update()
     {
@@ -59,9 +61,9 @@ public class CanonRotation : MonoBehaviour, InputSystem_Actions.ICannonActions
         if (context.canceled)
         {
             var projectile = Instantiate(Bullet, transform.position, Quaternion.identity); //canviar la posició on s'instancia
-            projectile.GetComponent<Rigidbody2D>().linearVelocity = new Vector2(ProjectileSpeed, ProjectileSpeed);
+            projectile.GetComponent<Rigidbody2D>().linearVelocity = _distanceBetweenMouseAndPlayer * ProjectileSpeed;
 
-            ProjectileSpeed = 0f;
+			ProjectileSpeed = 0f;
 			isRaising = false;
         }
     }
@@ -71,7 +73,7 @@ public class CanonRotation : MonoBehaviour, InputSystem_Actions.ICannonActions
 		Vector3 mousePos = MainCamera.ScreenToWorldPoint(screenPosition); //obtenir el valor del click del cursor (Fer amb new input system)
 		_distanceBetweenMouseAndPlayer = mousePos - transform.position; //obtenir el vector distància entre el canó i el cursor
 		float angle = (Mathf.Atan2(_distanceBetweenMouseAndPlayer.y, _distanceBetweenMouseAndPlayer.x) * 180f / Mathf.PI + _offset);
-        angle = Mathf.Clamp(angle, 0, 90);
+        angle = Mathf.Clamp(angle, -50, 40);
         transform.rotation = Quaternion.Euler(0, 0, angle); //en quin dels tres eixos va l'angle?
 	}
 }
